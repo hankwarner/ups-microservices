@@ -20,8 +20,7 @@ namespace TrackingNumberIntegration
     public class UPSTrackingFunctions
     {
         public static IConfiguration _config { get; set; }
-        public static string errorLogsUrl = Environment.GetEnvironmentVariable("");
-        public const string devTeamsUrl = @"https://outlook.office.com/webhook/857cffbb-fa74-4820-8fad-9f6cd37124f6@3c2f8435-994c-4552-8fe8-2aec2d0822e4/IncomingWebhook/74ddc5b3e7884e219412382ce66b0b8e/89f765ec-9688-47bc-b817-1e989e9a2767";
+        public string errorLogsUrl = Environment.GetEnvironmentVariable("DEV_TEAMS_URL");
 
         public UPSTrackingFunctions(IConfiguration config)
         {
@@ -58,7 +57,7 @@ namespace TrackingNumberIntegration
                 var title = "Error in AddNewTrackingNumbers";
                 var text = $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}";
                 var color = "red";
-                var teamsMessage = new TeamsMessage(title, text, color, devTeamsUrl);
+                var teamsMessage = new TeamsMessage(title, text, color, errorLogsUrl);
                 teamsMessage.LogToMicrosoftTeams(teamsMessage);
                 log.LogError(ex, title);
             }
@@ -94,7 +93,7 @@ namespace TrackingNumberIntegration
                 var title = "Error in UpdateTrackingNumbersInTransit";
                 var text = $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}";
                 var color = "red";
-                var teamsMessage = new TeamsMessage(title, text, color, devTeamsUrl);
+                var teamsMessage = new TeamsMessage(title, text, color, errorLogsUrl);
                 teamsMessage.LogToMicrosoftTeams(teamsMessage);
                 log.LogError(ex, title);
             }
