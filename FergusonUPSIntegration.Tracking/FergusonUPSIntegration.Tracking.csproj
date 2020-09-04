@@ -12,7 +12,7 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\UPSHelpers\FergusonUPSIntegrationCore.csproj" />
+    <ProjectReference Include="..\FergusonUPSIntegration.Core\FergusonUPSIntegration.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">

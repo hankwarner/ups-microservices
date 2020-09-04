@@ -17,7 +17,6 @@ namespace FergusonUPSIntegrationCore
     {
         public const string upsTrackingApiUrl = @"https://onlinetools.ups.com/rest/Track";
         public const string teamsUrl = @"";
-        public static string connectionString = Environment.GetEnvironmentVariable("CONN_UPS");
 
 
         /// <summary>

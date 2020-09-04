@@ -13,14 +13,14 @@ using Microsoft.WindowsAzure.Storage.Table;
 using Dapper;
 using FergusonUPSIntregrationCore.Models;
 using TrackingNumbers.Controllers;
+using TeamsHelper;
 
 namespace TrackingNumberIntegration
 {
     public class UPSTrackingFunctions
     {
         public static IConfiguration _config { get; set; }
-        public static string errorLogsUrl = Environment.GetEnvironmentVariable("");
-        public const string devTeamsUrl = @"https://outlook.office.com/webhook/857cffbb-fa74-4820-8fad-9f6cd37124f6@3c2f8435-994c-4552-8fe8-2aec2d0822e4/IncomingWebhook/74ddc5b3e7884e219412382ce66b0b8e/89f765ec-9688-47bc-b817-1e989e9a2767";
+        public string errorLogsUrl = Environment.GetEnvironmentVariable("DEV_TEAMS_URL");
 
         public UPSTrackingFunctions(IConfiguration config)
         {
@@ -40,15 +40,27 @@ namespace TrackingNumberIntegration
             [BlobTrigger("ups-tracking-numbers/{fileName}.csv", Connection = "BLOB_CONN")] Stream blob, 
             string fileName, ILogger log)
         {
-            if (!fileName.ToLower().Contains("tracking")) return;
+            try
+            {
+                if (!fileName.ToLower().Contains("tracking")) return;
 
-            var fileController = new FileController(log);
+                var fileController = new FileController(log);
 
-            var trackingRecords = fileController.GetTrackingNumbersFromFile(blob);
+                var trackingRecords = fileController.GetTrackingNumbersFromFile(blob);
 
-            var upsController = new UPSController(log);
+                var upsController = new UPSController(log);
 
-            upsController.AddTrackingNumbersToDB(trackingRecords);
+                upsController.AddTrackingNumbersToDB(trackingRecords);
+            }
+            catch(Exception ex)
+            {
+                var title = "Error in AddNewTrackingNumbers";
+                var text = $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}";
+                var color = "red";
+                var teamsMessage = new TeamsMessage(title, text, color, errorLogsUrl);
+                teamsMessage.LogToMicrosoftTeams(teamsMessage);
+                log.LogError(ex, title);
+            }
         }
 
 
@@ -60,13 +72,31 @@ namespace TrackingNumberIntegration
         /// <param name="timer">Triggers the function on time increvals.</param>
         /// <param name="log">Fuction logger (provided by Azure Function).</param>
         [FunctionName("UpdateTrackingNumbersInTransit")]
-        public void UpdateTrackingNumbersInTransit([TimerTrigger("0 */5 * * * *")] TimerInfo timer, ILogger log)
+        public void UpdateTrackingNumbersInTransit([TimerTrigger("0 */60 * * * *")] TimerInfo timer, ILogger log)
         {
-            var upsController = new UPSController(log);
+            try
+            {
+                var upsController = new UPSController(log);
 
-            var trackingNumbersInTransit = upsController.GetTrackingNumbersInTransit();
+                var trackingNumbersInTransit = upsController.GetTrackingNumbersInTransit();
 
-            upsController.UpdateCurrentStatusOfTrackingNumbers(trackingNumbersInTransit);
+                if (trackingNumbersInTransit.Count() == 0)
+                {
+                    log.LogInformation("No tracking numbers currently in transit.");
+                    return;
+                }
+
+                upsController.UpdateCurrentStatusOfTrackingNumbers(trackingNumbersInTransit);
+            }
+            catch(Exception ex)
+            {
+                var title = "Error in UpdateTrackingNumbersInTransit";
+                var text = $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}";
+                var color = "red";
+                var teamsMessage = new TeamsMessage(title, text, color, errorLogsUrl);
+                teamsMessage.LogToMicrosoftTeams(teamsMessage);
+                log.LogError(ex, title);
+            }
         }
     }
 }
