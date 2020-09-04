@@ -8,7 +8,7 @@ using FergusonUPSIntegrationCore;
 using Polly;
 using Microsoft.Extensions.Logging;
 using TeamsHelper;
-
+using FergusonUPSIntegrationCore.Models;
 
 namespace TrackingNumbers.Controllers
 {
@@ -18,7 +18,6 @@ namespace TrackingNumbers.Controllers
         {
             _logger = logger;
         }
-
 
         public string connectionString = Environment.GetEnvironmentVariable("SQL_CONN");
         public string devTeamsUrl = Environment.GetEnvironmentVariable("DEV_TEAMS_URL");
@@ -30,71 +29,40 @@ namespace TrackingNumbers.Controllers
         ///     For each tracking number provided, adds a new line to the Tracking Numbers table (with address and ref number) and to the
         ///     Status Updates table (with current status and location of the package).
         /// </summary>
-        /// <param name="trackingDataRecords">Tracking data objects that include a tracking number. Used in the UPS Track API request.</param>
+        /// <param name="trackingDataRecords">Tracking data objects that includes a tracking number. Used in the UPS Track API request.</param>
         public void AddTrackingNumbersToDB(IEnumerable<UPSTracking> trackingDataRecords)
         {
             foreach (var trackingRecord in trackingDataRecords)
             {
                 try
                 {
-                    var currTrackingNum = trackingRecord.TrackingNumber;
-                    _logger.LogInformation($"Tracking Number: {currTrackingNum}");
+                    var trackingNumber = trackingRecord.TrackingNumber;
+                    _logger.LogInformation($"Tracking Number: {trackingNumber}");
 
                     // Call the Track API
-                    var upsRequest = new UPSRequest(currTrackingNum);
+                    var upsRequest = new UPSRequest(trackingNumber);
                     var upsResponse = TrackAPI.GetUPSTrackingData(upsRequest);
 
                     if (upsResponse.Fault != null)
                     {
-                        var errMessage = upsResponse.Fault.detail?.Errors.ErrorDetail.PrimaryErrorCode.Description;
-                        _logger.LogError($"{currTrackingNum}: {errMessage}");
-
-                        // Keep track of these for exception report
-                        if (errMessage.Contains("Invalid tracking number"))
-                        {
-                            invalidTrackingNumbers.Add(currTrackingNum);
-                        }
-
+                        HandleTrackAPIFault(upsResponse, trackingNumber);
                         continue;
                     }
 
-                    // Set origin
-                    var originAddress = TrackAPI.GetAddressByType(upsResponse, "Shipper Address");
-                    trackingRecord.OriginAddress = originAddress?.Address.AddressLine;
-                    trackingRecord.OriginCity = originAddress?.Address.City;
-                    trackingRecord.OriginState = originAddress?.Address.StateProvinceCode;
-                    var originZip = originAddress?.Address.PostalCode;
+                    SetOriginAddress(trackingRecord, upsResponse);
 
-                    // Format with hyphen after first 5 digits
-                    if (originZip.Length > 5)
-                    {
-                        originZip = originZip.Insert(5, "-");
-                    }
+                    SetDestinationAddress(trackingRecord, upsResponse);
 
-                    trackingRecord.OriginZip = originZip;
-
-                    // Set destination
-                    var destinationAddress = TrackAPI.GetAddressByType(upsResponse, "ShipTo Address");
-                    trackingRecord.DestinationCity = destinationAddress?.Address.City;
-                    trackingRecord.DestinationState = destinationAddress?.Address.StateProvinceCode;
-                    trackingRecord.DestinationZip = destinationAddress?.Address.PostalCode;
-
-                    // Set Reference Number
                     trackingRecord.ReferenceNumber = TrackAPI.GetReferenceNum(upsResponse);
 
-                    // Insert line to UPS.tracking.TrackingNumbers
+                    // Insert line to UPSIntegration.tracking.TrackingNumbers
                     InsertLineToUPSTable(trackingRecord, "TrackingNumbers");
 
                     // Get latest status, location and timestamp
-                    var latestActivity = TrackAPI.GetLatestActivity(upsResponse);
-                    trackingRecord.Status = latestActivity.Status;
-                    trackingRecord.Location = latestActivity.Location;
-                    trackingRecord.TimeStamp = latestActivity.TimeStamp;
-                    trackingRecord.ExceptionReason = latestActivity.ExceptionReason;
+                    SetLatestActivity(trackingRecord, upsResponse);
 
-                    // Insert to UPS.tracking.StatusUpdates
+                    // Insert to UPSIntegration.tracking.StatusUpdates
                     InsertLineToUPSTable(trackingRecord, "StatusUpdates");
-
                 }
                 catch (SqlException sqlEx)
                 {
@@ -102,13 +70,87 @@ namespace TrackingNumbers.Controllers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error in AddAllTrackingNumbers.");
-                    var title = "Error in AddAllTrackingNumbers";
+                    var title = "Error in AddTrackingNumbersToDB";
                     var text = $"Error message: {ex.Message}";
                     var color = "red";
                     var teamsMessage = new TeamsMessage(title, text, color, devTeamsUrl);
                     teamsMessage.LogToMicrosoftTeams(teamsMessage);
+                    _logger.LogError(ex, title);
                 }
+            }
+        }
+
+
+        /// <summary>
+        ///     Sets the sender address on the tracking record based on the UPS Track API response.
+        /// </summary>
+        /// <param name="trackingRecord">Object containing tracking data that will be written to UPS Integration DB.</param>
+        /// <param name="upsResponse">Response object from the UPS Track API.</param>
+        public void SetOriginAddress(UPSTracking trackingRecord, UPSResponse upsResponse)
+        {
+            var originAddress = TrackAPI.GetAddressByType(upsResponse, "Shipper Address");
+            trackingRecord.OriginAddress = originAddress?.Address.AddressLine;
+            trackingRecord.OriginCity = originAddress?.Address.City;
+            trackingRecord.OriginState = originAddress?.Address.StateProvinceCode;
+            var originZip = originAddress?.Address.PostalCode;
+
+            // Format with hyphen after first 5 digits
+            if (originZip.Length > 5)
+            {
+                originZip = originZip.Insert(5, "-");
+            }
+
+            trackingRecord.OriginZip = originZip;
+        }
+
+
+        /// <summary>
+        ///     Sets the receiving address on the tracking record based on the UPS Track API response.
+        /// </summary>
+        /// <param name="trackingRecord">Object containing tracking data that will be written to UPS Integration DB.</param>
+        /// <param name="upsResponse">Response object from the UPS Track API.</param>
+        public void SetDestinationAddress(UPSTracking trackingRecord, UPSResponse upsResponse)
+        {
+            var destinationAddress = TrackAPI.GetAddressByType(upsResponse, "ShipTo Address");
+            
+            trackingRecord.DestinationCity = destinationAddress?.Address.City;
+            trackingRecord.DestinationState = destinationAddress?.Address.StateProvinceCode;
+            trackingRecord.DestinationZip = destinationAddress?.Address.PostalCode;
+        }
+
+
+        /// <summary>
+        ///     Sets the package's current status, location, timestamp and exception (if applicable) on the tracking record based on the 
+        ///     UPS Track API response.
+        /// </summary>
+        /// <param name="trackingRecord">Object containing tracking data that will be written to UPS Integration DB.</param>
+        /// <param name="upsResponse">Response object from the UPS Track API.</param>
+        public void SetLatestActivity(UPSTracking trackingRecord, UPSResponse upsResponse)
+        {
+            var latestActivity = TrackAPI.GetLatestActivity(upsResponse);
+
+            trackingRecord.Status = latestActivity.Status;
+            trackingRecord.Location = latestActivity.Location;
+            trackingRecord.TimeStamp = latestActivity.TimeStamp;
+            trackingRecord.ExceptionReason = latestActivity.ExceptionReason;
+        }
+
+
+        /// <summary>
+        ///     Parses the fault message from the UPS Track API response and logs error. If tracking number is invalid, it is added to the 
+        ///     invalid tracking numbers list that is used in exception reporting.
+        /// </summary>
+        /// <param name="upsResponse">Response object from the UPS Track API.</param>
+        /// <param name="trackingNumber">Tracking number of the package being tracked.</param>
+        public void HandleTrackAPIFault(UPSResponse upsResponse, string trackingNumber)
+        {
+            var errMessage = upsResponse.Fault.detail?.Errors.ErrorDetail.PrimaryErrorCode.Description;
+            _logger.LogError($"{trackingNumber}: {errMessage}");
+
+            // Keep track of these for exception report
+            if (errMessage.Contains("Invalid tracking number"))
+            {
+                invalidTrackingNumbers.Add(trackingNumber);
             }
         }
 
@@ -212,7 +254,6 @@ namespace TrackingNumbers.Controllers
                         GROUP BY TrackingNumber
                         HAVING SUM(
 	                        CASE WHEN 
-                                Status IS NOT NULL OR 	                    
                                 Status LIKE '%Delivered%' OR 
 		                        Status IN ('Exception', 'Returned to Shipper', 'Returned')
 		                    THEN 1 ELSE 0 END) = 0";

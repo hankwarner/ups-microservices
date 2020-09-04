@@ -13,4 +13,9 @@
     <PackageReference Include="coverlet.collector" Version="1.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FergusonUPSIntegration.Core\FergusonUPSIntegration.Core.csproj" />
+    <ProjectReference Include="..\FergusonUPSIntegration.Tracking\FergusonUPSIntegration.Tracking.csproj" />
+  </ItemGroup>
+
 </Project>
