@@ -136,7 +136,7 @@ namespace FergusonUPSIntegrationCore
 
                 if (activity.Status == "Exception")
                 {
-                    activity.ExceptionReason = latestActivity.Status?.Description.Replace("'", ""); ;
+                    activity.ExceptionReason = latestActivity.Status.Description.Replace("'", ""); ;
                 }
 
                 // Remove seconds from timestamp
