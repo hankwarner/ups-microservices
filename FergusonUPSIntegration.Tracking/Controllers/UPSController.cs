@@ -19,7 +19,7 @@ namespace TrackingNumbers.Controllers
             _logger = logger;
         }
 
-        public string connectionString = Environment.GetEnvironmentVariable("SQL_CONN");
+        public string connectionString = Environment.GetEnvironmentVariable("UPS_SQL_CONN");
         public string devTeamsUrl = Environment.GetEnvironmentVariable("DEV_TEAMS_URL");
         public List<string> invalidTrackingNumbers { get; set; } = new List<string>();
         private ILogger _logger { get; set; }
