@@ -1,31 +1,24 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Data.SqlClient;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Table;
-using Dapper;
-using FergusonUPSIntregrationCore.Models;
 using TrackingNumbers.Controllers;
 using TeamsHelper;
+using System.Threading.Tasks;
 
 namespace TrackingNumberIntegration
 {
     public class UPSTrackingFunctions
     {
-        public static IConfiguration _config { get; set; }
-        public string errorLogsUrl = Environment.GetEnvironmentVariable("DEV_TEAMS_URL");
-
         public UPSTrackingFunctions(IConfiguration config)
         {
             _config = config;
         }
+
+        public static IConfiguration _config { get; set; }
+        public string errorLogsUrl = Environment.GetEnvironmentVariable("DEV_TEAMS_URL");
 
 
         /// <summary>
@@ -36,21 +29,31 @@ namespace TrackingNumberIntegration
         /// <param name="fileName">Name of the file that was added to the blob.</param>
         /// <param name="log">Fuction logger (provided by Azure Function).</param>
         [FunctionName("AddNewTrackingNumbers")]
-        public void AddNewTrackingNumbers(
-            [BlobTrigger("ups-tracking-numbers/{fileName}.csv", Connection = "BLOB_CONN")] Stream blob, 
+        public async Task AddNewTrackingNumbers(
+            [BlobTrigger("ups-tracking-numbers/{fileName}.csv", Connection = "UPS_BLOB_CONN")] Stream blob, 
             string fileName, ILogger log)
         {
             try
             {
+                // Files must include Tracking in the name to be processed
                 if (!fileName.ToLower().Contains("tracking")) return;
 
-                var fileController = new FileController(log);
+                var fileController = new FileController(log, errorLogsUrl);
+                var upsController = new UPSController(log);
 
                 var trackingRecords = fileController.GetTrackingNumbersFromFile(blob);
 
-                var upsController = new UPSController(log);
-
                 upsController.AddTrackingNumbersToDB(trackingRecords);
+
+                if(upsController.invalidTrackingNumbers.Count() > 0)
+                {
+                    var reportName = fileController.CreateInvalidTrackingNumberReport(upsController.invalidTrackingNumbers);
+                    log.LogInformation($"Invalid tracking number report created: {reportName}");
+                }
+
+                // Move processed file to archive container
+                await fileController.MoveProcessedFileToArchive(fileName);
+                log.LogInformation("File moved to archive container");
             }
             catch(Exception ex)
             {

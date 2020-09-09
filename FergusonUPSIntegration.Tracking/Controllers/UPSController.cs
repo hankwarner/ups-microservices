@@ -147,11 +147,8 @@ namespace TrackingNumbers.Controllers
             var errMessage = upsResponse.Fault.detail?.Errors.ErrorDetail.PrimaryErrorCode.Description;
             _logger.LogError($"{trackingNumber}: {errMessage}");
 
-            // Keep track of these for exception report
-            if (errMessage.Contains("Invalid tracking number"))
-            {
-                invalidTrackingNumbers.Add(trackingNumber);
-            }
+            // These will be written to an exception report in the invalid-tracking-numbers container
+            invalidTrackingNumbers.Add(trackingNumber);
         }
 
 
