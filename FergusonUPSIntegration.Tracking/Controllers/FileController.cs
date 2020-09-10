@@ -6,18 +6,27 @@ using System.Linq;
 using FergusonUPSIntregrationCore.Models;
 using CsvHelper;
 using Microsoft.Extensions.Logging;
+using TeamsHelper;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Blob;
+using System.Text;
+using System.Threading.Tasks;
+using FergusonUPSIntegration.Core.Models;
 
 namespace TrackingNumbers.Controllers
 {
     public class FileController
     {
-        public FileController(ILogger logger)
+        public FileController(ILogger logger, string logsUrl)
         {
             _logger = logger;
+            errorLogsUrl = logsUrl;
+            storageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("UPS_BLOB_CONN"));
         }
 
-
         private ILogger _logger { get; set; }
+        public string errorLogsUrl { get; set; }
+        CloudStorageAccount storageAccount { get; set; }
 
 
         /// <summary>
@@ -29,7 +38,7 @@ namespace TrackingNumbers.Controllers
         {
             try
             {
-                List<TrackingNumberFile> trackingNumbers = new List<TrackingNumberFile>();
+                var trackingNumbers = new List<TrackingNumberFile>();
 
                 using (var reader = new StreamReader(blob))
                 using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
@@ -48,6 +57,88 @@ namespace TrackingNumbers.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in GetTrackingNumbersFromFile");
+                throw;
+            }
+        }
+
+
+
+        /// <summary>
+        ///     Writes a new CSV file to invalid-tracking-numbers blob container.
+        /// </summary>
+        /// <param name="invalidTrackingNumbers">List of tracking numbers that were not recognized by UPS to write to CSV file.</param>
+        public string CreateInvalidTrackingNumberReport(List<InvalidTrackingNumber> invalidTrackingNumbers)
+        {
+            var fileName = "";
+
+            try
+            {
+                var client = storageAccount.CreateCloudBlobClient();
+                var container = client.GetContainerReference("invalid-tracking-numbers");
+                
+                var today = DateTime.Now.ToString("MM.dd.yyyy.HH.mm.ss");
+                fileName = $"InvalidTrackingNumbers{today}.csv";
+
+                var blob = container.GetBlockBlobReference(fileName);
+
+                // Format list as text for csv of rows of tracking numbers
+                blob.Properties.ContentType = "text/csv";
+                var csvFileContent = "TrackingNumber,Exception\n";
+
+                invalidTrackingNumbers.ForEach(line => csvFileContent += line.TrackingNumber + "," + line.Exception + "\n");
+
+                blob.UploadText(csvFileContent);
+            }
+            catch (Exception ex)
+            {
+                var title = "Error in CreateInvalidTrackingNumberReport";
+                var text = $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}";
+                var teamsMessage = new TeamsMessage(title, text, "yellow", errorLogsUrl);
+                teamsMessage.LogToMicrosoftTeams(teamsMessage);
+                _logger.LogError(ex, title);
+            }
+
+            return fileName;
+        }
+
+
+        /// <summary>
+        ///     Moves the processed file from the ups-tracking-numbers container to the ups-tracking-numbers-archive container.
+        /// </summary>
+        /// <param name="fileName">Name of the file that was added to the source container.</param>
+        public async Task<CloudBlockBlob> MoveProcessedFileToArchive(string fileName)
+        {
+            try
+            {
+                var blobClient = storageAccount.CreateCloudBlobClient();
+
+                var trackingNumbersContainer = blobClient.GetContainerReference("ups-tracking-numbers");
+                var tn = trackingNumbersContainer.Exists();
+                var archiveContainer = blobClient.GetContainerReference("ups-tracking-numbers-archive");
+                var arch = archiveContainer.Exists();
+
+                var srcBlob = trackingNumbersContainer.GetBlockBlobReference(fileName + ".csv");
+                var destBlob = archiveContainer.GetBlockBlobReference(fileName + ".csv");
+
+                var srcExists = srcBlob.Exists();
+                var destExists = destBlob.Exists();
+
+                // Copy the file from the source container to the ups-tracking-numbers-archive container
+                await destBlob.StartCopyAsync(srcBlob);
+
+                // Delete file from ups-tracking-numbers container
+                await srcBlob.DeleteAsync();
+
+                return destBlob;
+
+            }
+            catch (Exception ex)
+            {
+                var title = "Error in AddNewTrackingNumbers";
+                var text = $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}";
+                var teamsMessage = new TeamsMessage(title, text, "yellow", errorLogsUrl);
+                teamsMessage.LogToMicrosoftTeams(teamsMessage);
+                _logger.LogError(ex, title);
                 throw;
             }
         }
