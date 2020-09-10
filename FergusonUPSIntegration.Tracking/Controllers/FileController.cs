@@ -11,6 +11,7 @@ using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using System.Text;
 using System.Threading.Tasks;
+using FergusonUPSIntegration.Core.Models;
 
 namespace TrackingNumbers.Controllers
 {
@@ -37,7 +38,7 @@ namespace TrackingNumbers.Controllers
         {
             try
             {
-                List<TrackingNumberFile> trackingNumbers = new List<TrackingNumberFile>();
+                var trackingNumbers = new List<TrackingNumberFile>();
 
                 using (var reader = new StreamReader(blob))
                 using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
@@ -66,7 +67,7 @@ namespace TrackingNumbers.Controllers
         ///     Writes a new CSV file to invalid-tracking-numbers blob container.
         /// </summary>
         /// <param name="invalidTrackingNumbers">List of tracking numbers that were not recognized by UPS to write to CSV file.</param>
-        public string CreateInvalidTrackingNumberReport(List<string> invalidTrackingNumbers)
+        public string CreateInvalidTrackingNumberReport(List<InvalidTrackingNumber> invalidTrackingNumbers)
         {
             var fileName = "";
 
@@ -82,7 +83,9 @@ namespace TrackingNumbers.Controllers
 
                 // Format list as text for csv of rows of tracking numbers
                 blob.Properties.ContentType = "text/csv";
-                var csvFileContent = string.Join("\n", invalidTrackingNumbers);
+                var csvFileContent = "TrackingNumber,Exception\n";
+
+                invalidTrackingNumbers.ForEach(line => csvFileContent += line.TrackingNumber + "," + line.Exception + "\n");
 
                 blob.UploadText(csvFileContent);
             }

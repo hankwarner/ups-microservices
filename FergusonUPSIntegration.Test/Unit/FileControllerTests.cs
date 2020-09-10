@@ -10,6 +10,11 @@ using Microsoft.Azure.Storage.Blob;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using FergusonUPSIntegration.Core.Models;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Net;
+using CsvHelper;
+using System.Globalization;
 
 namespace FergusonUPSIntegration.Test.Unit
 {
@@ -27,15 +32,15 @@ namespace FergusonUPSIntegration.Test.Unit
         [Fact]
         public void Test_CreateInvalidTrackingNumberReport()
         {
-            var invalidTrackingNumbers = new List<string>() { "1Z78451497898", "1Z89725179614", "1Z7845348122" };
+            var invalidTrackingNumbers = CreateInvalidTrackingNumbers();
 
             var reportName = fileController.CreateInvalidTrackingNumberReport(invalidTrackingNumbers);
 
             var blob = GetBlobByName("invalid-tracking-numbers", reportName);
 
-            var trackingNumbers = GetTrackingNumbersFromFile(blob);
+            var invalidTrackingNumberData = GetInvalidTrackingNumberDataFromBlob(blob);
 
-            Assert.Equal(invalidTrackingNumbers, trackingNumbers);
+            Assert.Equal(invalidTrackingNumbers, invalidTrackingNumberData);
 
             blob.Delete();
         }
@@ -45,7 +50,7 @@ namespace FergusonUPSIntegration.Test.Unit
         public async void Test_MoveProcessedFileToArchive()
         {
             // create file in ups-tracking
-            var newTrackingNumbers = new List<string>() { "1Z78451497898", "1Z89725179614", "1Z7845348122" };
+            var newTrackingNumbers = CreateInvalidTrackingNumbers();
             var fileName = "Tracking Numbers Test.csv";
             var trackingNumbersBlob = GetBlobByName("ups-tracking-numbers", fileName);
 
@@ -55,11 +60,23 @@ namespace FergusonUPSIntegration.Test.Unit
             var archiveBlob = await fileController.MoveProcessedFileToArchive(fileName.Replace(".csv", ""));
 
             // get file from archive
-            var archivedTrackingNumbers = GetTrackingNumbersFromFile(archiveBlob);
+            var archivedTrackingNumberData = GetInvalidTrackingNumberDataFromBlob(archiveBlob);
 
-            Assert.Equal(newTrackingNumbers, archivedTrackingNumbers);
+            Assert.Equal(newTrackingNumbers, archivedTrackingNumberData);
 
             archiveBlob.Delete();
+        }
+
+
+        private List<InvalidTrackingNumber> CreateInvalidTrackingNumbers()
+        {
+            var invalidTrackingNumbers = new List<InvalidTrackingNumber>()
+            {
+                new InvalidTrackingNumber("1Z78451497898", "No tracking information available."),
+                new InvalidTrackingNumber("1Z7845348122", "Tracking number does not exist.")
+            };
+
+            return invalidTrackingNumbers;
         }
 
 
@@ -76,7 +93,7 @@ namespace FergusonUPSIntegration.Test.Unit
         }
 
 
-        private void WriteCSVBlobFromList(CloudBlockBlob blob, List<string> content)
+        private void WriteCSVBlobFromList(CloudBlockBlob blob, List<InvalidTrackingNumber> content)
         {
             blob.Properties.ContentType = "text/csv";
 
@@ -86,19 +103,19 @@ namespace FergusonUPSIntegration.Test.Unit
         }
 
 
-        private List<string> GetTrackingNumbersFromFile(CloudBlockBlob blob)
+        private List<InvalidTrackingNumber> GetInvalidTrackingNumberDataFromBlob(CloudBlockBlob blob)
         {
-            var memoryStream = new MemoryStream();
+            var wc = new WebClient();
+            var invalidTrackingNumberData = new List<InvalidTrackingNumber>();
 
-            // Downloads blob's content to a stream
-            blob.DownloadToStream(memoryStream);
+            using (var sourceStream = wc.OpenRead(blob.Uri))
+            using (var reader = new StreamReader(sourceStream))
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            {
+                invalidTrackingNumberData = csv.GetRecords<InvalidTrackingNumber>().ToList();
+            }
 
-            // Puts the byte arrays to a string
-            var csvText = Encoding.UTF8.GetString(memoryStream.ToArray());
-
-            var trackingNumbers = csvText.Split("\n").ToList();
-
-            return trackingNumbers;
+            return invalidTrackingNumberData;
         }
     }
 }

@@ -9,6 +9,7 @@ using Polly;
 using Microsoft.Extensions.Logging;
 using TeamsHelper;
 using FergusonUPSIntegrationCore.Models;
+using FergusonUPSIntegration.Core.Models;
 
 namespace TrackingNumbers.Controllers
 {
@@ -21,7 +22,7 @@ namespace TrackingNumbers.Controllers
 
         public string connectionString = Environment.GetEnvironmentVariable("UPS_SQL_CONN");
         public string devTeamsUrl = Environment.GetEnvironmentVariable("DEV_TEAMS_URL");
-        public List<string> invalidTrackingNumbers { get; set; } = new List<string>();
+        public List<InvalidTrackingNumber> invalidTrackingNumbers { get; set; } = new List<InvalidTrackingNumber>();
         private ILogger _logger { get; set; }
         
 
@@ -148,7 +149,7 @@ namespace TrackingNumbers.Controllers
             _logger.LogError($"{trackingNumber}: {errMessage}");
 
             // These will be written to an exception report in the invalid-tracking-numbers container
-            invalidTrackingNumbers.Add(trackingNumber);
+            invalidTrackingNumbers.Add(new InvalidTrackingNumber(trackingNumber, errMessage));
         }
 
 
