@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeamsHelper", "TeamsHelper\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FergusonUPSIntegration.Test", "FergusonUPSIntegration.Test\FergusonUPSIntegration.Test.csproj", "{DB6B0F74-3A1D-4139-B2D0-3C030E409691}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FergusonUPSIntegration.Rating", "FergusonUPSIntegration.Rating\FergusonUPSIntegration.Rating.csproj", "{9295926A-21C0-4A5B-B154-2915D4A48639}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{DB6B0F74-3A1D-4139-B2D0-3C030E409691}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB6B0F74-3A1D-4139-B2D0-3C030E409691}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB6B0F74-3A1D-4139-B2D0-3C030E409691}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9295926A-21C0-4A5B-B154-2915D4A48639}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9295926A-21C0-4A5B-B154-2915D4A48639}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9295926A-21C0-4A5B-B154-2915D4A48639}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9295926A-21C0-4A5B-B154-2915D4A48639}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
