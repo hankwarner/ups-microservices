@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FergusonUPSIntegrationCore.Models
+namespace FergusonUPSIntegration.Core.Models
 {
     public class UPSResponse
     {

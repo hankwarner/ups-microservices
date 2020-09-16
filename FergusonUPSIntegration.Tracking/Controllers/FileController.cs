@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using FergusonUPSIntregrationCore.Models;
 using CsvHelper;
 using Microsoft.Extensions.Logging;
-using TeamsHelper;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using System.Text;
@@ -94,7 +92,7 @@ namespace TrackingNumbers.Controllers
                 var title = "Error in CreateInvalidTrackingNumberReport";
                 var text = $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}";
                 var teamsMessage = new TeamsMessage(title, text, "yellow", errorLogsUrl);
-                teamsMessage.LogToMicrosoftTeams(teamsMessage);
+                teamsMessage.LogToTeams(teamsMessage);
                 _logger.LogError(ex, title);
             }
 
@@ -137,7 +135,7 @@ namespace TrackingNumbers.Controllers
                 var title = "Error in AddNewTrackingNumbers";
                 var text = $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}";
                 var teamsMessage = new TeamsMessage(title, text, "yellow", errorLogsUrl);
-                teamsMessage.LogToMicrosoftTeams(teamsMessage);
+                teamsMessage.LogToTeams(teamsMessage);
                 _logger.LogError(ex, title);
                 throw;
             }

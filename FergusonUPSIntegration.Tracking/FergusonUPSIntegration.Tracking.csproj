@@ -12,6 +12,10 @@
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="4.0.2" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.7" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
+    <PackageReference Include="System.ServiceModel.Duplex" Version="4.4.*" />
+    <PackageReference Include="System.ServiceModel.Http" Version="4.4.*" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.4.*" />
+    <PackageReference Include="System.ServiceModel.Security" Version="4.4.*" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FergusonUPSIntegration.Core\FergusonUPSIntegration.Core.csproj" />
@@ -24,5 +28,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services" />
   </ItemGroup>
 </Project>

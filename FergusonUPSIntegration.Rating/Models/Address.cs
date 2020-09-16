@@ -4,7 +4,7 @@ using System.Text;
 
 namespace FergusonUPSIntegration.Rating.Models
 {
-    public class Address
+    public class ShipToAddress
     {
         public string AddressLine1 { get; set; }
 

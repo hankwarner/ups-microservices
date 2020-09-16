@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FergusonUPSIntegration.Rating.Models
+namespace FergusonUPSIntegration.Core.Models
 {
     public class ShipQuoteRequest
     {
@@ -10,7 +10,7 @@ namespace FergusonUPSIntegration.Rating.Models
 
         public ShipToAddress OriginAddress { get; set; }
 
-        public Package Package { get; set; }
+        public PackageRequest Package { get; set; }
     }
 
 

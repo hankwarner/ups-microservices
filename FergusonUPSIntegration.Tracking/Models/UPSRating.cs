@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using RateWebReference;
+using RateWebService;
 
 
-namespace FergusonUPSIntegration.Rating.Models
+namespace FergusonUPSIntegration.Core.Models
 {
     public class UPSRating
     {
-        public UPSRating(string rateType, ShipToAddress origin, ShipToAddress destination, Package package)
+        public UPSRating(string rateType, ShipToAddress origin, ShipToAddress destination, PackageRequest package)
         {
             rateRequest = CreateNewRateRequest(rateType, origin, destination, package);
         }
@@ -31,7 +31,7 @@ namespace FergusonUPSIntegration.Rating.Models
         }
 
 
-        private static RateRequest CreateNewRateRequest(string rateType, ShipToAddress origin, ShipToAddress destination, Package package)
+        private static RateRequest CreateNewRateRequest(string rateType, ShipToAddress origin, ShipToAddress destination, PackageRequest package)
         {
             var request = new RequestType()
             {
@@ -91,7 +91,7 @@ namespace FergusonUPSIntegration.Rating.Models
         }
 
 
-        private static PackageType[] CreatePackage(Package package)
+        private static PackageType[] CreatePackage(PackageRequest package)
         {
             var packageWeight = new PackageWeightType()
             {

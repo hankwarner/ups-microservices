@@ -1,6 +1,6 @@
 ﻿using CsvHelper.Configuration.Attributes;
 
-namespace FergusonUPSIntregrationCore.Models
+namespace FergusonUPSIntegration.Core.Models
 {
     public class TrackingNumberFile
     {

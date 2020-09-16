@@ -23,7 +23,7 @@ namespace FergusonUPSIntegration.Rating
         }
 
         public static IConfiguration _config { get; set; }
-        public string errorLogsUrl = Environment.GetEnvironmentVariable("UPS_RATING_ERROR_LOG");
+        public string ratingErrorLogsUrl = Environment.GetEnvironmentVariable("UPS_RATING_ERROR_LOG");
 
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace FergusonUPSIntegration.Rating
 
                 var title = "Exception in ShipQuoteGround";
                 var text = $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}";
-                var teamsMessage = new TeamsMessage(title, text, "red", errorLogsUrl);
+                var teamsMessage = new TeamsMessage(title, text, "red", ratingErrorLogsUrl);
                 teamsMessage.LogToTeams(teamsMessage);
 
                 return new BadRequestObjectResult(ex.Message);
@@ -106,7 +106,7 @@ namespace FergusonUPSIntegration.Rating
 
                 var title = "Exception in ShipQuoteSecondDay";
                 var text = $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}";
-                var teamsMessage = new TeamsMessage(title, text, "red", errorLogsUrl);
+                var teamsMessage = new TeamsMessage(title, text, "red", ratingErrorLogsUrl);
                 teamsMessage.LogToTeams(teamsMessage);
 
                 return new BadRequestObjectResult(ex.Message);
@@ -150,7 +150,7 @@ namespace FergusonUPSIntegration.Rating
 
                 var title = "Exception in ShipQuoteNextDay";
                 var text = $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}";
-                var teamsMessage = new TeamsMessage(title, text, "red", errorLogsUrl);
+                var teamsMessage = new TeamsMessage(title, text, "red", ratingErrorLogsUrl);
                 teamsMessage.LogToTeams(teamsMessage);
 
                 return new BadRequestObjectResult(ex.Message);

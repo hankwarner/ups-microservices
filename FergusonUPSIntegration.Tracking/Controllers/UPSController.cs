@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Text;
 using Dapper;
-using FergusonUPSIntregrationCore.Models;
 using FergusonUPSIntegrationCore;
 using Polly;
 using Microsoft.Extensions.Logging;
-using TeamsHelper;
-using FergusonUPSIntegrationCore.Models;
 using FergusonUPSIntegration.Core.Models;
 
 namespace TrackingNumbers.Controllers
@@ -21,7 +18,7 @@ namespace TrackingNumbers.Controllers
         }
 
         public string connectionString = Environment.GetEnvironmentVariable("UPS_SQL_CONN");
-        public string devTeamsUrl = Environment.GetEnvironmentVariable("DEV_TEAMS_URL");
+        public string trackingErrorLogsUrl = Environment.GetEnvironmentVariable("UPS_TRACKING_ERROR_LOG");
         public List<InvalidTrackingNumber> invalidTrackingNumbers { get; set; } = new List<InvalidTrackingNumber>();
         private ILogger _logger { get; set; }
         
@@ -74,8 +71,8 @@ namespace TrackingNumbers.Controllers
                     var title = "Error in AddTrackingNumbersToDB";
                     var text = $"Error message: {ex.Message}";
                     var color = "red";
-                    var teamsMessage = new TeamsMessage(title, text, color, devTeamsUrl);
-                    teamsMessage.LogToMicrosoftTeams(teamsMessage);
+                    var teamsMessage = new TeamsMessage(title, text, color, trackingErrorLogsUrl);
+                    teamsMessage.LogToTeams(teamsMessage);
                     _logger.LogError(ex, title);
                 }
             }
@@ -320,8 +317,8 @@ namespace TrackingNumbers.Controllers
                     var title = "Error in UpdateCurrentStatusOfTrackingNumbers";
                     var text = $"Error message: {ex.Message}";
                     var color = "yellow";
-                    var teamsMessage = new TeamsMessage(title, text, color, devTeamsUrl);
-                    teamsMessage.LogToMicrosoftTeams(teamsMessage);
+                    var teamsMessage = new TeamsMessage(title, text, color, trackingErrorLogsUrl);
+                    teamsMessage.LogToTeams(teamsMessage);
                 }
             }
         }
