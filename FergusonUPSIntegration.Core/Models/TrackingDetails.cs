@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FergusonUPSIntregrationCore.Models
+namespace FergusonUPSIntegration.Core.Models
 {
     public class TrackingDetails
     {

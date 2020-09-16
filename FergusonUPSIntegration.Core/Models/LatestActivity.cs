@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FergusonUPSIntegrationCore.Models
+namespace FergusonUPSIntegration.Core.Models
 {
     public class LatestActivity
     {

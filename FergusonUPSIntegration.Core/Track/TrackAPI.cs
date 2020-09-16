@@ -1,12 +1,10 @@
 ﻿using System;
-using FergusonUPSIntregrationCore.Models;
+using FergusonUPSIntegration.Core.Models;
 using RestSharp;
 using Polly;
 using Serilog;
-using TeamsHelper;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
-using FergusonUPSIntegrationCore.Models;
 using System.Data.SqlClient;
 using System.Linq;
 
@@ -76,7 +74,7 @@ namespace FergusonUPSIntegrationCore
                 var text = $"Address type {addressType}. Error message: {ex.Message}";
                 var color = "red";
                 var teamsMessage = new TeamsMessage(title, text, color, teamsUrl);
-                teamsMessage.LogToMicrosoftTeams(teamsMessage);
+                teamsMessage.LogToTeams(teamsMessage);
             }
 
             Log.Warning($"No address was found for type {addressType}. Tracking Number: {upsResponse.TrackResponse.Shipment.InquiryNumber.Value}");
@@ -109,7 +107,7 @@ namespace FergusonUPSIntegrationCore
                 var text = $"Error message: {ex.Message}";
                 var color = "yellow";
                 var teamsMessage = new TeamsMessage(title, text, color, teamsUrl);
-                teamsMessage.LogToMicrosoftTeams(teamsMessage);
+                teamsMessage.LogToTeams(teamsMessage);
             }
 
             return "";
@@ -158,7 +156,7 @@ namespace FergusonUPSIntegrationCore
                 var text = $"Error message: {ex.Message}";
                 var color = "yellow";
                 var teamsMessage = new TeamsMessage(title, text, color, teamsUrl);
-                teamsMessage.LogToMicrosoftTeams(teamsMessage);
+                teamsMessage.LogToTeams(teamsMessage);
             }
 
             return activity;

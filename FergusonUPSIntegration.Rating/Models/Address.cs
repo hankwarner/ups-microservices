@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FergusonUPSIntegration.Core.Models
+namespace FergusonUPSIntegration.Rating.Models
 {
     public class ShipToAddress
     {
