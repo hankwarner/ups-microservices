@@ -8,76 +8,25 @@ using FergusonUPSIntegration.Controllers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using AzureFunctions.Extensions.Swashbuckle.Attribute;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Http;
 using RateWebService;
 using FergusonUPSIntegration.Helpers;
 using FergusonUPSIntegration.Models;
+using System.Net;
 
 namespace FergusonUPSIntegration
 {
-    public class UPSTrackingFunctions
+    public class TrackingFunctions
     {
-        public UPSTrackingFunctions(IConfiguration config)
+        public TrackingFunctions(IConfiguration config)
         {
             _config = config;
         }
 
         public static IConfiguration _config { get; set; }
         public string trackingErrorLogsUrl = Environment.GetEnvironmentVariable("UPS_TRACKING_ERROR_LOG");
-        public string ratingErrorLogsUrl = Environment.GetEnvironmentVariable("UPS_RATING_ERROR_LOG");
-
-
-        /// <summary>
-        ///     Uses the UPS Rating API to provide a Ground, 2nd Day Air or Next Day Air ship quote for the request origin and destination location.
-        ///     Requires the total package weight, ship to address and ship from address.
-        /// </summary>
-        /// <param name="req">Post request body containing a Ship Quote Request.</param>
-        /// <returns>The total shipment cost to two decimal places.</returns>
-        [FunctionName("QuoteShipment")]
-        public async Task<IActionResult> QuoteShipment(
-            [HttpTrigger(AuthorizationLevel.Function, "post", Route = "rating")] HttpRequest req,
-            ILogger log)
-        {
-            try
-            {
-                var jsonReq = new StreamReader(req.Body).ReadToEnd();
-                var reqBody = JsonConvert.DeserializeObject<ShipQuoteRequest>(jsonReq);
-                var rateType = reqBody.RateType.ToLower();
-                log.LogInformation(@"Request body: {ReqBody}", reqBody);
-                log.LogInformation(@"Rate type: {RateType}", rateType);
-
-                if (!UPSRating.rateTypes.Contains(rateType))
-                {
-                    log.LogWarning("Invalid rate type.");
-                    return new BadRequestObjectResult($"Invalid rateType. Must be one of the following: {UPSRating.rateTypes}");
-                }
-
-                var client = new RatePortTypeClient();
-                var security = UPSRequestHelper.CreateUPSSecurity();
-
-                var upsRating = new UPSRating(rateType, reqBody.OriginAddress, reqBody.DestinationAddress, reqBody.Package);
-
-                upsRating.rateResponse = await client.ProcessRateAsync(security, upsRating.rateRequest);
-
-                log.LogInformation(@"UPS Response: {RateResponse}", upsRating.rateResponse);
-                log.LogInformation($"Total ship cost: {upsRating.TotalShipCost}");
-
-                return new OkObjectResult(upsRating.TotalShipCost);
-            }
-            catch (Exception ex)
-            {
-                log.LogError(ex.Message);
-                log.LogError(ex.StackTrace);
-
-                var title = "Exception in ShipQuoteGround";
-                var text = $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}";
-                var teamsMessage = new TeamsMessage(title, text, "red", ratingErrorLogsUrl);
-                teamsMessage.LogToTeams(teamsMessage);
-
-                return new BadRequestObjectResult(ex.Message);
-            }
-        }
 
 
         /// <summary>

@@ -1,4 +1,5 @@
-﻿
+﻿using System.Collections.Generic;
+
 namespace FergusonUPSIntegration.Models
 {
     public class ShipToAddress

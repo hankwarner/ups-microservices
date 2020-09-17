@@ -1,11 +1,25 @@
-﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+﻿using AzureFunctions.Extensions.Swashbuckle;
+using FergusonUPSIntegration;
+using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Hosting;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Reflection;
 
+[assembly: WebJobsStartup(typeof(SwashBuckleStartup))]
+[assembly: FunctionsStartup(typeof(Startup))]
 namespace FergusonUPSIntegration
 {
+    internal class SwashBuckleStartup : IWebJobsStartup
+    {
+        public void Configure(IWebJobsBuilder builder)
+        {
+            //Register the extension
+            builder.AddSwashBuckle(Assembly.GetExecutingAssembly());
+        }
+    }
+
+
     public class Startup : FunctionsStartup
     {
         public override void Configure(IFunctionsHostBuilder builder)
