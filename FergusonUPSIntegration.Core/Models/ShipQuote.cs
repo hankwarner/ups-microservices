@@ -6,6 +6,8 @@ namespace FergusonUPSIntegration.Core.Models
 {
     public class ShipQuoteRequest
     {
+        public string RateType { get; set; }
+
         public ShipToAddress DestinationAddress { get; set; }
 
         public ShipToAddress OriginAddress { get; set; }
@@ -14,8 +16,9 @@ namespace FergusonUPSIntegration.Core.Models
     }
 
 
-    //public class ShipQuoteResponse
-    //{
-        
-    //}
+    public class ShipQuoteResponse
+    {
+        // Key = rate type (ground, second day air, next day air), Value = estimated cost of shipment
+        public Dictionary<string, double> Rates { get; set; }
+    }
 }
