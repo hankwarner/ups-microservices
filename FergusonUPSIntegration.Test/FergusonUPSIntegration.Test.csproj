@@ -14,8 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FergusonUPSIntegration.Core\FergusonUPSIntegration.Core.csproj" />
-    <ProjectReference Include="..\FergusonUPSIntegration.Tracking\FergusonUPSIntegration.Tracking.csproj" />
+    <ProjectReference Include="..\FergusonUPSIntegration.Tracking\FergusonUPSIntegration.csproj" />
   </ItemGroup>
 
 </Project>
