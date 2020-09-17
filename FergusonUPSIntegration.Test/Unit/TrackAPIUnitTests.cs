@@ -1,8 +1,7 @@
-using FergusonUPSIntegrationCore.Models;
 using FergusonUPSIntegrationCore;
 using System;
 using Xunit;
-using FergusonUPSIntregrationCore.Models;
+using FergusonUPSIntegration.Core.Models;
 
 namespace FergusonUPSIntegration.Test
 {

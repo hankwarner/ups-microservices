@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
-using TrackingNumbers.Controllers;
+using FergusonUPSIntegration.Controllers;
 using Microsoft.Extensions.Logging;
 using FergusonUPSIntegration.Test.Helpers;
-using FergusonUPSIntregrationCore.Models;
+using FergusonUPSIntegration.Core.Models;
 using System.Data.SqlClient;
 using Dapper;
 using System.Linq;
