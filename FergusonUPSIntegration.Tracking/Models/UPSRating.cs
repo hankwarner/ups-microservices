@@ -14,18 +14,19 @@ namespace FergusonUPSIntegration.Core.Models
         }
 
         public RateRequest rateRequest { get; set; }
-
         public RateResponse1 rateResponse { get; set; } = new RateResponse1();
+        public static List<string> rateTypes = new List<string>() { "next day air", "second day air", "ground", "next day air saver", "next day air early", "second day air a.m." };
+
 
         public double TotalShipCost
         {
             get
             {
-                if(rateResponse.RateResponse.RatedShipment.Length == 0)
+                if (rateResponse.RateResponse.RatedShipment.Length == 0)
                 {
                     throw new ArgumentNullException("RatedShipment", "Please set the rateResponse to the UPS Rating API response.");
                 }
-                
+
                 return double.Parse(rateResponse.RateResponse.RatedShipment[0].TotalCharges.MonetaryValue);
             }
         }
@@ -123,25 +124,22 @@ namespace FergusonUPSIntegration.Core.Models
 
             switch (rateType)
             {
-                case "Next Day Air":
+                case "next day air":
                     serviceCode = "01";
                     break;
-                case "2nd Day Air":
+                case "second day air":
                     serviceCode = "02";
                     break;
-                case "Ground":
+                case "ground":
                     serviceCode = "03";
                     break;
-                case "3 Day Select":
-                    serviceCode = "12";
-                    break;
-                case "Next Day Air Saver":
+                case "next day air saver":
                     serviceCode = "13";
                     break;
-                case "Next Day Air Early":
+                case "next day air early":
                     serviceCode = "14";
                     break;
-                case "2nd Day Air A.M.":
+                case "second day air a.m.":
                     serviceCode = "59";
                     break;
                 default:
