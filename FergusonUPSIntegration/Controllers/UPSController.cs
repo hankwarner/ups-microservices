@@ -251,7 +251,7 @@ namespace FergusonUPSIntegration.Controllers
 		                        Status IN ('Exception', 'Returned to Shipper', 'Returned')
 		                    THEN 1 ELSE 0 END) = 0";
 
-                    var trackingNumbersInTransit = conn.Query<UPSTracking>(query, commandTimeout: 10);
+                    var trackingNumbersInTransit = conn.Query<UPSTracking>(query, commandTimeout: 60);
 
                     conn.Close();
 
