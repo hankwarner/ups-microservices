@@ -11,8 +11,6 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using AzureFunctions.Extensions.Swashbuckle.Attribute;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Http;
-using RateWebService;
-using FergusonUPSIntegration.Helpers;
 using FergusonUPSIntegration.Models;
 using System.Net;
 
@@ -38,7 +36,7 @@ namespace FergusonUPSIntegration
         /// <param name="log">Fuction logger (provided by Azure Function).</param>
         [FunctionName("AddNewTrackingNumbers")]
         public async Task AddNewTrackingNumbers(
-            [BlobTrigger("ups-tracking-numbers/{fileName}.csv", Connection = "UPS_BLOB_CONN")] Stream blob, 
+            [BlobTrigger("ups-tracking-numbers/{fileName}.csv", Connection = "UPS_BLOB_CONN")] Stream blob,
             string fileName, ILogger log)
         {
             try
@@ -53,7 +51,7 @@ namespace FergusonUPSIntegration
 
                 upsController.AddTrackingNumbersToDB(trackingRecords);
 
-                if(upsController.invalidTrackingNumbers.Count() > 0)
+                if (upsController.invalidTrackingNumbers.Count() > 0)
                 {
                     var reportName = fileController.CreateInvalidTrackingNumberReport(upsController.invalidTrackingNumbers);
                     log.LogInformation($"Invalid tracking number report created: {reportName}");
@@ -63,7 +61,7 @@ namespace FergusonUPSIntegration
                 await fileController.MoveProcessedFileToArchive(fileName);
                 log.LogInformation("File moved to archive container");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 var title = "Error in AddNewTrackingNumbers";
                 var text = $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}";
@@ -99,7 +97,7 @@ namespace FergusonUPSIntegration
 
                 upsController.UpdateCurrentStatusOfTrackingNumbers(trackingNumbersInTransit);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 var title = "Error in UpdateTrackingNumbersInTransit";
                 var text = $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}";

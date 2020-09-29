@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using RateWebService;
 
-
 namespace FergusonUPSIntegration.Models
 {
     public class UPSRating

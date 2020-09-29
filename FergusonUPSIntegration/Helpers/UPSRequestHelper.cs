@@ -8,7 +8,7 @@ namespace FergusonUPSIntegration.Helpers
 
         public static UPSSecurity CreateUPSSecurity()
         {
-            
+
             var svcAccessToken = new UPSSecurityServiceAccessToken()
             {
                 AccessLicenseNumber = Environment.GetEnvironmentVariable("UPS_API_LICENSE")
