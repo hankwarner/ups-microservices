@@ -1,32 +1,32 @@
-﻿//using System;
-//using RateWebService;
+﻿using System;
+using RateWebService;
 
-//namespace FergusonUPSIntegration.Helpers
-//{
-//    public class UPSRequestHelper
-//    {
+namespace FergusonUPSIntegration.Helpers
+{
+    public class UPSRequestHelper
+    {
 
-//        public static UPSSecurity CreateUPSSecurity()
-//        {
-            
-//            var svcAccessToken = new UPSSecurityServiceAccessToken()
-//            {
-//                AccessLicenseNumber = Environment.GetEnvironmentVariable("UPS_API_LICENSE")
-//            };
+        public static UPSSecurity CreateUPSSecurity()
+        {
 
-//            var userNameToken = new UPSSecurityUsernameToken()
-//            {
-//                Username = Environment.GetEnvironmentVariable("UPS_API_USER"),
-//                Password = Environment.GetEnvironmentVariable("UPS_API_PW")
-//            };
+            var svcAccessToken = new UPSSecurityServiceAccessToken()
+            {
+                AccessLicenseNumber = Environment.GetEnvironmentVariable("UPS_API_LICENSE")
+            };
 
-//            var security = new UPSSecurity()
-//            {
-//                ServiceAccessToken = svcAccessToken,
-//                UsernameToken = userNameToken
-//            };
+            var userNameToken = new UPSSecurityUsernameToken()
+            {
+                Username = Environment.GetEnvironmentVariable("UPS_API_USER"),
+                Password = Environment.GetEnvironmentVariable("UPS_API_PW")
+            };
 
-//            return security;
-//        }
-//    }
-//}
+            var security = new UPSSecurity()
+            {
+                ServiceAccessToken = svcAccessToken,
+                UsernameToken = userNameToken
+            };
+
+            return security;
+        }
+    }
+}
