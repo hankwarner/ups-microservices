@@ -1,6 +1,6 @@
 # Description
 
-Azure Function App used to integrate Ferguson.com online order fulfillment with data provided from UPS API's, such as estimated shipping costs and package tracking information.
+Azure Function App used to integrate Ferguson.com online order fulfillment with data provided from UPS API's, such as estimated shipping costs, tracking information, and estimated delivery date.
 
 
 # Open API Definition
