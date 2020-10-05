@@ -25,6 +25,8 @@ namespace FergusonUPSIntegration.Models
         public class UPSResponse
         {
             public EMSResponse eMSResponse { get; set; }
+
+            public Validation validationList { get; set; }
         }
 
         public class EMSResponse
@@ -32,12 +34,21 @@ namespace FergusonUPSIntegration.Models
             public List<Service> services { get; set; }
         }
 
-
         public class Service
         {
             public string ServiceLevel { get; set; }
             public string ServiceLevelDescription { get; set; }
             public int BusinessTransitDays { get; set; }
+        }
+
+        public class Validation
+        {
+            public List<string> invalidFieldList { get; set; }
+        }
+
+        public class InvalidField
+        {
+
         }
 
 
@@ -90,6 +101,12 @@ namespace FergusonUPSIntegration.Models
             if (string.IsNullOrEmpty(jsonResponse)) throw new JsonReaderException("UPS returned null response.");
 
             var response = JsonConvert.DeserializeObject<UPSResponse>(jsonResponse);
+
+            if(response.validationList != null)
+            {
+                var invalidField = response.validationList.invalidFieldList[0];
+                throw new ArgumentException($"{invalidField} is invalid.");
+            }
 
             var services = response.eMSResponse.services;
 

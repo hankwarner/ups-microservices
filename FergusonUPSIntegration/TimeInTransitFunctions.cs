@@ -12,6 +12,8 @@ namespace FergusonUPSIntegration
     public static class TimeInTransitFunctions
     {
         [FunctionName("GetBusinessDaysInTransit")]
+        [QueryStringParameter("originZip", "The ship from zip code.", Required = true)]
+        [QueryStringParameter("destinationZip", "The ship to zip code.", Required = true)]
         public static IActionResult GetBusinessDaysInTransit(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "tnt")] HttpRequest req,
             ILogger log)
@@ -36,8 +38,8 @@ namespace FergusonUPSIntegration
                     log.LogWarning($"Required field is missing: {missingField}");
                     return new BadRequestObjectResult($"Invalid {missingField}")
                     {
-                        Value = $"{missingField} is a required query parameter.",
-                        StatusCode = 404
+                        Value = $"{missingField} is a required parameter.",
+                        StatusCode = 400
                     };
                 }
 
@@ -47,7 +49,16 @@ namespace FergusonUPSIntegration
 
                 return new OkObjectResult(businessDaysInTransit);
             }
-            catch(Exception ex)
+            catch (ArgumentException ex)
+            {
+                log.LogWarning(ex, "ArgumentException throw for invalid fields.");
+                return new BadRequestObjectResult(ex.Message)
+                {
+                    Value = ex.Message,
+                    StatusCode = 400
+                };
+            }
+            catch (Exception ex)
             {
                 log.LogError(ex, "Exception in GetBusinessDaysInTransit. Returning 500.");
                 return new StatusCodeResult(500);
