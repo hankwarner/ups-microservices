@@ -3,6 +3,11 @@
 Azure Function App used to integrate Ferguson.com online order fulfillment with data provided from UPS API's, such as estimated shipping costs and package tracking information.
 
 
+# Open API Definition
+
+https://fergusonupsintegration.azurewebsites.net/api/swagger/ui?code=Y6ldUiv/ljdjVxg7CAdwKNVJjeDHwZLp3tMWDT9AYT00aOxKKJvWhg==
+
+
 # Functions
 
 All functions use UPS API Services. [Documentation can be found here.](https://www.ups.com/upsdeveloperkit?loc=en_US).
