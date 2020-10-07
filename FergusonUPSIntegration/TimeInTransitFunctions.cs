@@ -45,7 +45,7 @@ namespace FergusonUPSIntegration
 
                 var timeInTransitService = new UPSTimeInTransit(originZip[0], destinationZip[0], log);
 
-                var businessDaysInTransit = timeInTransitService.GetGroundBusinessDaysInTransit();
+                var businessDaysInTransit = timeInTransitService.GetGroundBusinessDaysInTransit(0);
 
                 return new OkObjectResult(businessDaysInTransit);
             }
