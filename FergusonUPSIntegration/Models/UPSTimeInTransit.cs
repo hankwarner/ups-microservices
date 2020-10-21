@@ -123,7 +123,6 @@ namespace FergusonUPSIntegration.Models
 
             var services = response.eMSResponse.services;
             var groundService = services.FirstOrDefault(svc => svc.ServiceLevel == "GND");
-            //var groundBusinessDaysInTransit = groundService?.BusinessTransitDays;
 
             return groundService;
         }
