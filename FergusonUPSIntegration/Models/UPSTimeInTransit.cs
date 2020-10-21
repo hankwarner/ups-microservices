@@ -46,6 +46,7 @@ namespace FergusonUPSIntegration.Models
             public string ServiceLevel { get; set; }
             public string ServiceLevelDescription { get; set; }
             public int BusinessTransitDays { get; set; }
+            public string SaturdayDeliveryIndicator { get; set; }
         }
 
         public class Validation
@@ -73,7 +74,7 @@ namespace FergusonUPSIntegration.Models
         /// </summary>
         /// <param name="retryCount">Helps prevent infinite loops. Suggested value is 0, max number of retries is 2.</param>
         /// <returns>Business days in transit for UPS Ground service between the origin and destination.</returns>
-        public int? GetGroundBusinessDaysInTransit(int retryCount)
+        public Service GetUPSGroundService(int retryCount)
         {
             var retryPolicy = Policy.Handle<JsonReaderException>().Retry(5, (ex, count) =>
             {
@@ -117,14 +118,14 @@ namespace FergusonUPSIntegration.Models
                 }
 
                 // Re-run using the UPS suggested values
-                return GetGroundBusinessDaysInTransit(retryCount++);
+                return GetUPSGroundService(retryCount++);
             }
 
             var services = response.eMSResponse.services;
             var groundService = services.FirstOrDefault(svc => svc.ServiceLevel == "GND");
-            var groundBusinessDaysInTransit = groundService?.BusinessTransitDays;
+            //var groundBusinessDaysInTransit = groundService?.BusinessTransitDays;
 
-            return groundBusinessDaysInTransit;
+            return groundService;
         }
 
 
@@ -157,7 +158,7 @@ namespace FergusonUPSIntegration.Models
                 .AddHeader("Username", Environment.GetEnvironmentVariable("UPS_API_USER"))
                 .AddHeader("Password", Environment.GetEnvironmentVariable("UPS_API_PW"))
                 .AddHeader("AccessLicenseNumber", Environment.GetEnvironmentVariable("UPS_API_LICENSE"))
-                // UPS requires these values, but it does effect days in transit so we don't need them:
+                // UPS requires these values, but it doesn't effect days in transit so we don't need them:
                 .AddHeader("transactionSrc", "HMW")
                 .AddHeader("transId", "1234");
 

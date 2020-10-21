@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using AzureFunctions.Extensions.Swashbuckle.Attribute;
 using FergusonUPSIntegration.Models;
+using System.Net;
 
 namespace FergusonUPSIntegration
 {
@@ -14,6 +15,9 @@ namespace FergusonUPSIntegration
         [FunctionName("GetBusinessDaysInTransit")]
         [QueryStringParameter("originZip", "The ship from zip code.", Required = true)]
         [QueryStringParameter("destinationZip", "The ship to zip code.", Required = true)]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(TimeInTransitResponse))]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(BadRequestObjectResult))]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(StatusCodeResult))]
         public static IActionResult GetBusinessDaysInTransit(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "tnt")] HttpRequest req,
             ILogger log)
@@ -39,15 +43,17 @@ namespace FergusonUPSIntegration
                     return new BadRequestObjectResult($"Invalid {missingField}")
                     {
                         Value = $"{missingField} is a required parameter.",
-                        StatusCode = 400
+                        StatusCode = 404
                     };
                 }
 
                 var timeInTransitService = new UPSTimeInTransit(originZip[0], destinationZip[0], log);
 
-                var businessDaysInTransit = timeInTransitService.GetGroundBusinessDaysInTransit(0);
+                var groundService = timeInTransitService.GetUPSGroundService(0);
 
-                return new OkObjectResult(businessDaysInTransit);
+                var response = new TimeInTransitResponse(groundService);
+
+                return new OkObjectResult(response);
             }
             catch (ArgumentException ex)
             {
@@ -55,7 +61,7 @@ namespace FergusonUPSIntegration
                 return new BadRequestObjectResult(ex.Message)
                 {
                     Value = ex.Message,
-                    StatusCode = 400
+                    StatusCode = 404
                 };
             }
             catch (Exception ex)
