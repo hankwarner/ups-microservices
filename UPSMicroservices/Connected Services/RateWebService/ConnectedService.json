@@ -16,7 +16,6 @@
       "*, RateWebService"
     ],
     "references": [
-      "AzureFunctions.Extensions.Swashbuckle, {AzureFunctions.Extensions.Swashbuckle, 1.4.4}",
       "CsvHelper, {CsvHelper, 15.0.5}",
       "Dapper, {Dapper, 2.0.35}",
       "Microsoft.AspNetCore.Authentication.Abstractions, {Microsoft.AspNetCore.Authentication.Abstractions, 2.1.0}",
