@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FergusonUPSIntegration\UPSMicroservices.csproj" />
+    <ProjectReference Include="..\UPSMicroservices\UPSMicroservices.csproj" />
   </ItemGroup>
 
 </Project>
