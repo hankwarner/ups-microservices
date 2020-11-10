@@ -15,6 +15,8 @@ namespace UPSMicroservices.Controllers
             _logger = logger;
         }
 
+        public UPSController(){ }
+
         public string connectionString = Environment.GetEnvironmentVariable("UPS_SQL_CONN");
         public string trackingErrorLogsUrl = Environment.GetEnvironmentVariable("UPS_TRACKING_ERROR_LOG");
         public List<InvalidTrackingNumber> invalidTrackingNumbers { get; set; } = new List<InvalidTrackingNumber>();

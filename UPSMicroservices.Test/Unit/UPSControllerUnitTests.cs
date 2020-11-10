@@ -4,7 +4,6 @@ using System.Text;
 using Xunit;
 using UPSMicroservices.Controllers;
 using Microsoft.Extensions.Logging;
-using UPSMicroservices.Test.Helpers;
 using UPSMicroservices.Models;
 using System.Data.SqlClient;
 using Dapper;
@@ -14,15 +13,13 @@ namespace UPSMicroservices.Test.Unit
 {
     public class UPSControllerUnitTests
     {
-        private readonly ILogger logger = TestHelpers.CreateLogger();
-
         [Fact]
         public void Test_AddTrackingNumbersToDB()
         {
             var trackingNumbers = new List<string>(){ "1ZE7313W0317984577" };
             var trackingData = CreateUPSTrackingData(trackingNumbers);
 
-            var upsController = new UPSController(logger);
+            var upsController = new UPSController();
             
             upsController.AddTrackingNumbersToDB(trackingData);
 
