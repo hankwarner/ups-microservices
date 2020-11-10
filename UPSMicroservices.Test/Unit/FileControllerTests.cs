@@ -4,7 +4,6 @@ using System.Text;
 using Xunit;
 using UPSMicroservices.Controllers;
 using Microsoft.Extensions.Logging;
-using UPSMicroservices.Test.Helpers;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using System.IO;
@@ -22,10 +21,9 @@ namespace UPSMicroservices.Test.Unit
     {
         public FileControllerTests()
         {
-            fileController = new FileController(logger, "");
+            fileController = new FileController();
         }
 
-        private readonly ILogger logger = TestHelpers.CreateLogger();
         private FileController fileController { get; set; }
 
 

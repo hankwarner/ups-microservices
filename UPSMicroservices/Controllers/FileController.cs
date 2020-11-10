@@ -21,6 +21,11 @@ namespace UPSMicroservices.Controllers
             storageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("UPS_BLOB_CONN"));
         }
 
+        public FileController()
+        {
+            storageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("UPS_BLOB_CONN"));
+        }
+
         private ILogger _logger { get; set; }
         public string errorLogsUrl { get; set; }
         CloudStorageAccount storageAccount { get; set; }
