@@ -10,9 +10,9 @@ using System.Reflection;
 [assembly: FunctionsStartup(typeof(Startup))]
 namespace UPSMicroservices
 {
-    internal class SwashBuckleStartup : IWebJobsStartup
+    internal class SwashBuckleStartup : FunctionsStartup
     {
-        public void Configure(IWebJobsBuilder builder)
+        public override void Configure(IFunctionsHostBuilder builder)
         {
             //Register the extension
             builder.AddSwashBuckle(Assembly.GetExecutingAssembly());
