@@ -1,10 +1,8 @@
 using System;
 using System.IO;
-using System.Linq;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using UPSMicroservices.Controllers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -14,7 +12,6 @@ using Microsoft.AspNetCore.Http;
 using RateWebService;
 using UPSMicroservices.Helpers;
 using UPSMicroservices.Models;
-using System.Net;
 
 namespace UPSMicroservices
 {
@@ -35,10 +32,10 @@ namespace UPSMicroservices
         /// </summary>
         /// <param name="req">Post request body containing a Ship Quote Request.</param>
         /// <returns>The total shipment cost to two decimal places.</returns>
-        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(double))]
-        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(NotFoundObjectResult))]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(BadRequestObjectResult))]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(StatusCodeResult))]
+        [ProducesResponseType(typeof(double), 200)]
+        [ProducesResponseType(typeof(BadRequestObjectResult), 400)]
+        [ProducesResponseType(typeof(NotFoundObjectResult), 404)]
+        [ProducesResponseType(typeof(StatusCodeResult), 500)]
         [FunctionName("QuoteShipment")]
         public async Task<IActionResult> QuoteShipment(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "rating"), RequestBodyType(typeof(ShipQuoteRequest), "failed order")] HttpRequest req,
@@ -47,10 +44,10 @@ namespace UPSMicroservices
             try
             {
                 var jsonReq = new StreamReader(req.Body).ReadToEnd();
-                var reqBody = JsonConvert.DeserializeObject<ShipQuoteRequest>(jsonReq);
+                log.LogInformation(@"Request body: {0}", jsonReq);
+                
+                var reqBody = ShipQuoteRequest.FromJson(jsonReq);
                 var rateType = reqBody.RateType.ToLower();
-                log.LogInformation(@"Request body: {ReqBody}", reqBody);
-                log.LogInformation(@"Rate type: {RateType}", rateType);
 
                 if (!UPSRating.rateTypes.Contains(rateType))
                 {
@@ -70,7 +67,7 @@ namespace UPSMicroservices
 
                 upsRating.rateResponse = await client.ProcessRateAsync(security, upsRating.rateRequest);
 
-                log.LogInformation(@"UPS Response: {RateResponse}", upsRating.rateResponse);
+                log.LogInformation(@"UPS Response: {0}", upsRating.rateResponse.ToJson());
                 log.LogInformation($"Total ship cost: {upsRating.TotalShipCost}");
 
                 return new OkObjectResult(upsRating.TotalShipCost);

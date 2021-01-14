@@ -7,6 +7,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using Newtonsoft.Json;
+
 namespace RateWebService
 {
     
@@ -6435,8 +6437,13 @@ namespace RateWebService
         {
             this.RateResponse = RateResponse;
         }
+
+        public string ToJson()
+        {
+            return JsonConvert.SerializeObject(this);
+        }
     }
-    
+
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.2")]
     public interface RatePortTypeChannel : RateWebService.RatePortType, System.ServiceModel.IClientChannel
     {
