@@ -58,7 +58,7 @@ namespace UPSMicroservices.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in GetTrackingNumbersFromFile");
+                _logger.LogError(@"Error in GetTrackingNumbersFromFile: {0}", ex);
                 throw;
             }
         }
@@ -94,10 +94,9 @@ namespace UPSMicroservices.Controllers
             catch (Exception ex)
             {
                 var title = "Error in CreateInvalidTrackingNumberReport";
-                var text = $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}";
-                var teamsMessage = new TeamsMessage(title, text, "yellow", errorLogsUrl);
+                _logger.LogError(@"{0}: {1}.", title, ex);
+                var teamsMessage = new TeamsMessage(title, $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}", "yellow", errorLogsUrl);
                 teamsMessage.LogToTeams(teamsMessage);
-                _logger.LogError(ex, title);
             }
 
             return fileName;
@@ -137,10 +136,9 @@ namespace UPSMicroservices.Controllers
             catch (Exception ex)
             {
                 var title = "Error in AddNewTrackingNumbers";
-                var text = $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}";
-                var teamsMessage = new TeamsMessage(title, text, "yellow", errorLogsUrl);
+                _logger.LogError(@"{0}: {1}.", title, ex);
+                var teamsMessage = new TeamsMessage(title, $"Error message: {ex.Message}. Stacktrace: {ex.StackTrace}", "yellow", errorLogsUrl);
                 teamsMessage.LogToTeams(teamsMessage);
-                _logger.LogError(ex, title);
                 throw;
             }
         }
