@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace UPSMicroservices.Models
 {
     public class ShipToAddress

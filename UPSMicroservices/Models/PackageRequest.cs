@@ -1,4 +1,5 @@
 ﻿
+
 namespace UPSMicroservices.Models
 {
     public class PackageRequest
