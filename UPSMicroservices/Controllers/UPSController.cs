@@ -69,11 +69,9 @@ namespace UPSMicroservices.Controllers
                 catch (Exception ex)
                 {
                     var title = "Error in AddTrackingNumbersToDB";
-                    var text = $"Error message: {ex.Message}";
-                    var color = "red";
-                    var teamsMessage = new TeamsMessage(title, text, color, trackingErrorLogsUrl);
-                    teamsMessage.LogToTeams(teamsMessage);
                     _logger.LogError(ex, title);
+                    var teamsMessage = new TeamsMessage(title, $"Error message: {ex.Message}", "red", trackingErrorLogsUrl);
+                    teamsMessage.LogToTeams(teamsMessage);
                 }
             }
         }
@@ -161,8 +159,8 @@ namespace UPSMicroservices.Controllers
                 e => !e.Message.Contains("Violation of PRIMARY KEY constraint"))
                 .WaitAndRetry(4, _ => TimeSpan.FromMilliseconds(30), (ex, ts, count, context) =>
                 {
-                    string errorMessage = $"Error in InsertLineToUPSTable. Table name {tableName}";
-                    _logger.LogWarning(ex, $"{errorMessage} . Retrying...");
+                    var errorMessage = $"Error in InsertLineToUPSTable. Table name {tableName}";
+                    _logger.LogWarning(@"{0}: {1} . Retrying...", errorMessage, ex);
                     if (count == 4) { _logger.LogError(ex, errorMessage); }
                 });
 
@@ -232,8 +230,8 @@ namespace UPSMicroservices.Controllers
             var retryPolicy = Policy.Handle<SqlException>()
                 .WaitAndRetry(4, _ => TimeSpan.FromSeconds(30), (ex, ts, count, context) =>
                 {
-                    string errorMessage = $"Error in GetTrackingNumbersInTransit.";
-                    _logger.LogWarning(ex, $"{errorMessage} . Retrying...");
+                    var errorMessage = $"Error in GetTrackingNumbersInTransit.";
+                    _logger.LogWarning(@"{0}: {1} . Retrying...", errorMessage, ex);
                     if (count == 4) { _logger.LogError(ex, errorMessage); }
                 });
 
@@ -313,11 +311,9 @@ namespace UPSMicroservices.Controllers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error in UpdateCurrentStatusOfTrackingNumbers. Tracking Record: {@trackingRecord}", trackingRecord);
                     var title = "Error in UpdateCurrentStatusOfTrackingNumbers";
-                    var text = $"Error message: {ex.Message}";
-                    var color = "yellow";
-                    var teamsMessage = new TeamsMessage(title, text, color, trackingErrorLogsUrl);
+                    _logger.LogError(ex, title);
+                    var teamsMessage = new TeamsMessage(title, $"Error message: {ex.Message}", "yellow", trackingErrorLogsUrl);
                     teamsMessage.LogToTeams(teamsMessage);
                 }
             }

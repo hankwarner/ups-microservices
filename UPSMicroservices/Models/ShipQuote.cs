@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace UPSMicroservices.Models
 {
@@ -11,6 +12,11 @@ namespace UPSMicroservices.Models
         public ShipToAddress OriginAddress { get; set; }
 
         public PackageRequest Package { get; set; }
+
+        public static ShipQuoteRequest FromJson(string json)
+        {
+            return JsonConvert.DeserializeObject<ShipQuoteRequest>(json);
+        }
     }
 
 

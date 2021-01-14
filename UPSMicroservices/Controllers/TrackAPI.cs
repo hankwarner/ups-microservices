@@ -27,7 +27,7 @@ namespace UPSMicroservices.Controllers
                 .WaitAndRetry(4, _ => TimeSpan.FromSeconds(30), (ex, ts, count, context) =>
                 {
                     string errorMessage = "Error in GetUPSTrackingData";
-                    Log.Warning(ex, $"{errorMessage} . Retrying...");
+                    Log.Warning(@"{0}: {1} . Retrying...", errorMessage, ex);
                     if (count == 4) { Log.Error(ex, errorMessage); }
                 });
 
@@ -37,9 +37,9 @@ namespace UPSMicroservices.Controllers
 
                 var jsonRequest = JsonConvert.SerializeObject(upsRequest);
 
-                var req = new RestRequest(Method.POST);
-                req.AddHeader("Content-Type", "application/json");
-                req.AddParameter("application/json; charset=utf-8", jsonRequest, ParameterType.RequestBody);
+                var req = new RestRequest(Method.POST)
+                    .AddHeader("Content-Type", "application/json")
+                    .AddParameter("application/json; charset=utf-8", jsonRequest, ParameterType.RequestBody);
 
                 var jsonResponse = client.Execute(req).Content;
 
@@ -68,11 +68,9 @@ namespace UPSMicroservices.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"Error in GetAddressByType. Address type {addressType}.");
-                var title = "Error in GetAddressByType";
-                var text = $"Address type {addressType}. Error message: {ex.Message}";
-                var color = "red";
-                var teamsMessage = new TeamsMessage(title, text, color, teamsUrl);
+                var title = "Error in GetAddressByType.";
+                Log.Error(@"{0}: {1}.", title, ex);
+                var teamsMessage = new TeamsMessage(title, $"Address type {addressType}. Error message: {ex.Message}", "red", teamsUrl);
                 teamsMessage.LogToTeams(teamsMessage);
             }
 
@@ -101,11 +99,9 @@ namespace UPSMicroservices.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error in GetReferenceNum.");
-                var title = "Error in GetReferenceNum";
-                var text = $"Error message: {ex.Message}";
-                var color = "yellow";
-                var teamsMessage = new TeamsMessage(title, text, color, teamsUrl);
+                var title = "Error in GetReferenceNum.";
+                Log.Error(@"{0}: {1}.", title, ex);
+                var teamsMessage = new TeamsMessage(title, $"Error message: {ex.Message}", "yellow", teamsUrl);
                 teamsMessage.LogToTeams(teamsMessage);
             }
 
@@ -150,11 +146,9 @@ namespace UPSMicroservices.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error in ParseShipmentStatus.");
                 var title = $"Error in ParseShipmentStatus. Tracking Number: {upsResponse.TrackResponse.Shipment.InquiryNumber.Value}";
-                var text = $"Error message: {ex.Message}";
-                var color = "yellow";
-                var teamsMessage = new TeamsMessage(title, text, color, teamsUrl);
+                Log.Error(@"{0}: {1}.", title, ex);
+                var teamsMessage = new TeamsMessage(title, $"Error message: {ex.Message}", "yellow", teamsUrl);
                 teamsMessage.LogToTeams(teamsMessage);
             }
 
