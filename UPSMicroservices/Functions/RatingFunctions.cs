@@ -60,6 +60,12 @@ namespace UPSMicroservices
                     };
                 }
 
+                // UPS will throw error if weight is 0
+                if(reqBody.Package.Weight == 0)
+                {
+                    reqBody.Package.Weight = 1;
+                }
+
                 var client = new RatePortTypeClient();
                 var security = UPSRequestHelper.CreateUPSSecurity();
 
